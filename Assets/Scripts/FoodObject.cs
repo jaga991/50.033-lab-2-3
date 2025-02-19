@@ -4,22 +4,56 @@ public class FoodObject : MonoBehaviour
 {
     [SerializeField] private FoodObjectSO foodObjectSO;
 
-    private ClearCounter clearCounter;
+    private IFoodObjParent foodObjectParent;
 
     public FoodObjectSO GetFoodObjectSO() { return foodObjectSO; }
-    public void SetClearCounter(ClearCounter clearCounter)
+    public void SetFoodObjectParent(IFoodObjParent foodObjParent)
     {
-        if (this.clearCounter != null) {
-            this.clearCounter.ClearFoodObject();
+        if (this.foodObjectParent != null) {
+            this.foodObjectParent.ClearFoodObject();
         }
-        this.clearCounter = clearCounter;
-        if (clearCounter.HasFoodObject()) {
-            Debug.Log("Counter already has FoodObjet");
+        this.foodObjectParent = foodObjParent;  
+        if (foodObjectParent.HasFoodObject()) {
+            Debug.Log("IFoodObjectParent already has FoodObjet");
         }
-        clearCounter.SetFoodObject(this);
-        transform.parent = clearCounter.GetFoodObjectFollowTransform();
+        foodObjectParent.SetFoodObject(this);
+        transform.parent = foodObjectParent.GetFoodObjectFollowTransform();
         transform.localPosition = Vector3.zero;
     }
 
-    public ClearCounter GetClearCounter() { return clearCounter; }
+    public IFoodObjParent GetFoodObjectParent() { return foodObjectParent; }
+
+    public void DestroySelf()
+    {
+        //clear the parent of food object
+        foodObjectParent.ClearFoodObject();
+        //delete food object
+        Destroy(gameObject);
+    }
+
+    public bool TryGetPlate(out PlateFoodObject plateFoodObject)
+    {
+        if (this is PlateFoodObject)
+        {
+            plateFoodObject = this as PlateFoodObject;
+            return true;
+        }
+        else
+        {
+            plateFoodObject=null;
+            return false;
+        }
+    }
+
+
+    public static FoodObject SpawnFoodObject(FoodObjectSO foodObjectSO, IFoodObjParent foodObjParent)
+    {
+        Transform foodObjectTransform = Instantiate(foodObjectSO.prefab);
+        FoodObject foodObject = foodObjectTransform.GetComponent<FoodObject>();
+        foodObject.SetFoodObjectParent(foodObjParent);
+        foodObjectTransform.GetComponentInChildren<SpriteRenderer>().sortingOrder = 5;
+
+        return foodObject;
+
+    }
 }

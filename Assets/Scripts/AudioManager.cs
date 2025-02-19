@@ -8,8 +8,7 @@ public class AudioManager : MonoBehaviour
     public AudioSource sfxSource;    // For sound effects
 
     
-    public AudioClip backgroundMusic;
-    public AudioClip defaultSFX;
+    public AudioClip backgroundMusic;    public AudioClip defaultSFX;
 
     void Awake()
     {

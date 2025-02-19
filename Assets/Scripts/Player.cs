@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IFoodObjParent
 {
 
 
@@ -16,7 +16,7 @@ public class Player : MonoBehaviour
     //addes clearcounter as argument to eventhandler
     public class OnSelectedCounterChangedEventArgs : EventArgs
     {
-        public ClearCounter selectedCounter;
+        public BaseCounter selectedCounter;
     }
 
 
@@ -27,8 +27,12 @@ public class Player : MonoBehaviour
     private Vector3 lastInterectDir;
     private bool isWalking;
 
+    [SerializeField] private Transform foodObjectHoldPoint;
+    private FoodObject foodObject;
+
+
     //reference to player interacted counter
-    private ClearCounter selectedCounter;
+    private BaseCounter selectedCounter;
 
 
     private void Awake()
@@ -45,16 +49,26 @@ public class Player : MonoBehaviour
     private void Start()
     {
         gameInput.OnInteractAction += GameInput_OnInteractAction;
+        gameInput.OnInteractAlternateAction += GameInput_OnInteractAlternateAction;
         boxCollider = GetComponent<BoxCollider2D>(); // Get player's BoxCollider2D
+    }
+
+    private void GameInput_OnInteractAlternateAction(object sender, EventArgs e)
+    {
+        if (!GameManager.Instance.IsGamePlaying()) return;
+        if (selectedCounter != null)
+        {
+            selectedCounter.InteractAlternate(this);
+        }
     }
 
     private void GameInput_OnInteractAction(object sender, System.EventArgs e)
     {
+        if (!GameManager.Instance.IsGamePlaying()) return;
         // check selectedCounter variable if assigned value by HandleInteractions
-        if(selectedCounter != null)
+        if (selectedCounter != null)
         {
-            Debug.Log(selectedCounter.name);
-            selectedCounter.Interact();
+            selectedCounter.Interact(this);
         } 
     }
 
@@ -62,6 +76,7 @@ public class Player : MonoBehaviour
     {
         HandleMovement();
         HandleInteractions();
+        
     }
 
 
@@ -71,7 +86,7 @@ public class Player : MonoBehaviour
         Vector2 moveDir = inputVector.normalized;
         Vector2 boxSize = boxCollider.size;
 
-        float rayDistance = moveSpeed * Time.deltaTime + 0.8f; // Slight buffer
+        float rayDistance = moveSpeed * Time.deltaTime + 0.4f; // Slight buffer
 
         if (moveDir != Vector2.zero)
         {
@@ -84,13 +99,13 @@ public class Player : MonoBehaviour
             if (hit.collider != null && hit.collider.gameObject != gameObject) // Ignore player
             {
                 GameObject hitObject = hit.collider.gameObject;
-                if (hitObject.TryGetComponent<ClearCounter>(out ClearCounter clearCounter))
+                if (hitObject.TryGetComponent<BaseCounter>(out BaseCounter baseCounter))
                 {
                     //has clearcounter
                     //if current clearcounter is different from last selected counter
-                    if (clearCounter != selectedCounter)
+                    if (baseCounter != selectedCounter)
                     {
-                        SetSelectedCounter(clearCounter);
+                        SetSelectedCounter(baseCounter);
                     }
                 }
                 else
@@ -138,7 +153,6 @@ public class Player : MonoBehaviour
         }
 
         isWalking = moveDir != Vector2.zero;
-        Debug.Log(isWalking);
         // Move player
         transform.position += (Vector3)moveDir * moveSpeed * Time.deltaTime;
     }
@@ -157,7 +171,7 @@ public class Player : MonoBehaviour
         return false; // Not blocked
     }
 
-    private void SetSelectedCounter(ClearCounter selectedCounter)
+    private void SetSelectedCounter(BaseCounter selectedCounter)
     {
         this.selectedCounter = selectedCounter;
         OnSelectedCounterChange?.Invoke(this, new OnSelectedCounterChangedEventArgs
@@ -171,5 +185,28 @@ public class Player : MonoBehaviour
         return isWalking;
     }
 
+    public Transform GetFoodObjectFollowTransform()
+    {
+        return foodObjectHoldPoint;
+    }
 
+    public void SetFoodObject(FoodObject foodObject)
+    {
+        this.foodObject = foodObject;
+    }
+
+    public FoodObject GetFoodObject()
+    {
+        return foodObject;
+    }
+
+    public void ClearFoodObject()
+    {
+        foodObject = null;
+    }
+
+    public bool HasFoodObject()
+    {
+        return foodObject != null;
+    }
 }

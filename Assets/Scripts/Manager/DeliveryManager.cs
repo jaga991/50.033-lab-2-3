@@ -5,35 +5,47 @@ using System;
 
 public class DeliveryManager : MonoBehaviour
 {
-    //singleton
-    public event EventHandler OnRecipeSpawned;
-    public event EventHandler OnRecipeCompleted;
+    public static DeliveryManager Instance { get; private set; }
 
-    public event EventHandler OnRecipeSuccess;
-    public event EventHandler OnRecipeFailed;
-
-
-
-
-    public static DeliveryManager Instance {  get; private set; }
     [SerializeField] private RecipeListSO recipeListSO;
+    [SerializeField] private GameStateSO gameStateSO;
+
+    [SerializeField] private RecipeSpawnedEvent recipeSpawnedEvent;
+    [SerializeField] private RecipeCompletedEvent recipeCompletedEvent;
+    [SerializeField] private RecipeSuccessEvent recipeSuccessEvent;
+    [SerializeField] private RecipeFailedEvent recipeFailedEvent;
+
+    [SerializeField] private GameEventListenerGameState gameStateListener;
+
     private List<RecipeSO> waitingRecipeSOList;
 
     private float spawnRecipeTimer;
     private float spawnRecipeTimerMax = 4f;
     private int waitingRecipesMax = 4;
-    private int successfulRecipesAmount;
+
+    private void Start()
+    {
+        if (gameStateListener != null)
+            gameStateListener.AddResponse(RestartUI);
+    }
+
+    private void RestartUI(GameStateSO.State arg0)
+    {
+        Debug.Log("IN DELIVER MANAGER, RESTARTING UI PRINT LOG");
+    }
+
+ 
 
     private void Awake()
     {
-        //instantiate delivermanager singleton
         Instance = this;
         waitingRecipeSOList = new List<RecipeSO>();
     }
+
     private void Update()
     {
         spawnRecipeTimer -= Time.deltaTime;
-        if(spawnRecipeTimer <= 0f)
+        if (spawnRecipeTimer <= 0f)
         {
             spawnRecipeTimer = spawnRecipeTimerMax;
 
@@ -41,30 +53,24 @@ public class DeliveryManager : MonoBehaviour
             {
                 RecipeSO waitingRecipeSO = recipeListSO.recipeSOList[UnityEngine.Random.Range(0, recipeListSO.recipeSOList.Count)];
                 waitingRecipeSOList.Add(waitingRecipeSO);
-                OnRecipeSpawned?.Invoke(this, EventArgs.Empty);
+                recipeSpawnedEvent.Raise(waitingRecipeSO);
             }
-
         }
     }
 
     public void DeliverRecipe(PlateFoodObject plateFoodObject)
     {
-        
         for (int i = 0; i < waitingRecipeSOList.Count; i++)
         {
             RecipeSO waitingRecipeSO = waitingRecipeSOList[i];
 
-            if(waitingRecipeSO.foodObjectSOList.Count == plateFoodObject.GetFoodObjectSOList().Count)
+            if (waitingRecipeSO.foodObjectSOList.Count == plateFoodObject.GetFoodObjectSOList().Count)
             {
-                //has the same number of ingredients
-                bool plateContentsMatchesRecipe = true;
+                bool plateMatchesRecipe = true;
                 foreach (FoodObjectSO recipeFoodObjectSO in waitingRecipeSO.foodObjectSOList)
-                    //cycle through all ingredients in recipe
-                    
                 {
                     bool ingredientFound = false;
                     foreach (FoodObjectSO plateFoodObjectSO in plateFoodObject.GetFoodObjectSOList())
-                        //cycle through all ingredients in plate
                     {
                         if (plateFoodObjectSO == recipeFoodObjectSO)
                         {
@@ -73,29 +79,25 @@ public class DeliveryManager : MonoBehaviour
                         }
                     }
 
-                    if(!ingredientFound)
+                    if (!ingredientFound)
                     {
-                        //this recipe ingredient not on plate
-                        plateContentsMatchesRecipe = false;
-
+                        plateMatchesRecipe = false;
                     }
                 }
-                if (plateContentsMatchesRecipe)
+
+                if (plateMatchesRecipe)
                 {
-                    //player deliver correct recipe
-                    successfulRecipesAmount++;
+                    gameStateSO.currentScore++;
                     waitingRecipeSOList.RemoveAt(i);
-                    OnRecipeCompleted?.Invoke(this, EventArgs.Empty);
-                    OnRecipeSuccess?.Invoke(this, EventArgs.Empty);
+                    recipeCompletedEvent.Raise(true); // Recipe completed successfully
+                    recipeSuccessEvent.Raise(gameStateSO.currentScore);
                     return;
                 }
             }
         }
 
-        //No matches found
-        //player deliver incorrect recipe
-        Debug.Log("Player did not deliver correct recipe");
-        OnRecipeFailed?.Invoke(this, EventArgs.Empty);
+        Debug.Log("Player delivered an incorrect recipe");
+        recipeFailedEvent.Raise(gameStateSO.currentScore); // Notify UI of failed delivery
     }
 
     public List<RecipeSO> GetWaitingRecipeSOList()
@@ -105,6 +107,6 @@ public class DeliveryManager : MonoBehaviour
 
     public int GetSuccessfulRecipesAmount()
     {
-        return successfulRecipesAmount;
+        return gameStateSO.currentScore;
     }
 }

@@ -1,13 +1,15 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 public class BaseCounter:MonoBehaviour, IFoodObjParent
 {
 
 
-    [SerializeField] private Transform counterItem;
+    [SerializeField] public Transform counterItem;
     private FoodObject foodObject;
 
+    public static event EventHandler OnAnyObjectPlacedHere;
     public virtual void Interact(Player player)
     {
         Debug.LogError("BaseCounter.Interact(), should not be triggered here");
@@ -25,7 +27,12 @@ public class BaseCounter:MonoBehaviour, IFoodObjParent
 
     public void SetFoodObject(FoodObject foodObject)
     {
+
         this.foodObject = foodObject;
+        if (foodObject != null)
+        {
+            OnAnyObjectPlacedHere?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public FoodObject GetFoodObject()

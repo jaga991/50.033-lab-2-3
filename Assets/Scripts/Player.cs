@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour, IFoodObjParent
 {
@@ -12,6 +13,9 @@ public class Player : MonoBehaviour, IFoodObjParent
     //property
     public static Player Instance { get; private set;  }
 
+    [SerializeField] private GameStateSO gameStateSO;
+
+    public event EventHandler OnPickedSomething;
     public event EventHandler<OnSelectedCounterChangedEventArgs> OnSelectedCounterChange;
     //addes clearcounter as argument to eventhandler
     public class OnSelectedCounterChangedEventArgs : EventArgs
@@ -55,7 +59,8 @@ public class Player : MonoBehaviour, IFoodObjParent
 
     private void GameInput_OnInteractAlternateAction(object sender, EventArgs e)
     {
-        if (!GameManager.Instance.IsGamePlaying()) return;
+        //check gamemanager state == GamePlaying
+        if (!(gameStateSO.currentGameState == GameStateSO.State.GamePlaying)) return;
         if (selectedCounter != null)
         {
             selectedCounter.InteractAlternate(this);
@@ -64,7 +69,8 @@ public class Player : MonoBehaviour, IFoodObjParent
 
     private void GameInput_OnInteractAction(object sender, System.EventArgs e)
     {
-        if (!GameManager.Instance.IsGamePlaying()) return;
+        //check gamemanager state == GamePlaying
+        if (!(gameStateSO.currentGameState == GameStateSO.State.GamePlaying)) return;
         // check selectedCounter variable if assigned value by HandleInteractions
         if (selectedCounter != null)
         {
@@ -192,6 +198,7 @@ public class Player : MonoBehaviour, IFoodObjParent
 
     public void SetFoodObject(FoodObject foodObject)
     {
+        OnPickedSomething?.Invoke(this, EventArgs.Empty);
         this.foodObject = foodObject;
     }
 
@@ -209,4 +216,6 @@ public class Player : MonoBehaviour, IFoodObjParent
     {
         return foodObject != null;
     }
+
+
 }

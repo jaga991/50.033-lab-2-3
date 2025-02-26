@@ -11,8 +11,36 @@ public class SoundManager : MonoBehaviour
 
     private void Start()
     {
-        DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
-        DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
+        //DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
+        //DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
+        //Player.Instance.OnPickedSomething += Player_OnPickedSomething;
+        //BaseCounter.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
+        //TrashCounter.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
+        //CuttingCounter.OnAnyObjectCut += CuttingCounter_OnAnyObjectCut;
+
+    }
+
+    private void CuttingCounter_OnAnyObjectCut(object sender, System.EventArgs e)
+    {
+        CuttingCounter cuttingCounter = sender as CuttingCounter;
+        PlaySound(audioClipRefsSO.chop, cuttingCounter.transform.position);
+    }
+
+    private void TrashCounter_OnAnyObjectTrashed(object sender, System.EventArgs e)
+    {
+        TrashCounter trashCounter = sender as TrashCounter;
+        PlaySound(audioClipRefsSO.trash, trashCounter.transform.position);
+    }
+
+    private void BaseCounter_OnAnyObjectPlacedHere(object sender, System.EventArgs e)
+    {
+        BaseCounter baseCounter = sender as BaseCounter;
+        PlaySound(audioClipRefsSO.objectDrop, baseCounter.transform.position);
+    }
+
+    private void Player_OnPickedSomething(object sender, System.EventArgs e)
+    {
+        PlaySound(audioClipRefsSO.objectPickup, Player.Instance.transform.position);
     }
 
     private void DeliveryManager_OnRecipeSuccess(object sender, System.EventArgs e)

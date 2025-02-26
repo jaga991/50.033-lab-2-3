@@ -4,15 +4,17 @@ using UnityEngine;
 public class GameStartCountdownUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI countdownText;
+    [SerializeField] private GameEventListenerGameState gameStateListener;
+    [SerializeField] private GameStateSO gameStateSO;
 
     private void Start()
     {
-        GameManager.Instance.OnStateChanged += GameManager_OnStateChanged;
+        gameStateListener.response.AddListener(UpdateUI);
     }
 
-    private void GameManager_OnStateChanged(object sender, System.EventArgs e)
+    private void UpdateUI(GameStateSO.State state)
     {
-        if (GameManager.Instance.IsCountdownToStartActive())
+        if (state == GameStateSO.State.CountdownToStart)
         {
             Show();
         }
@@ -34,6 +36,6 @@ public class GameStartCountdownUI : MonoBehaviour
 
     private void Update()
     {
-        countdownText.text = Mathf.Ceil(GameManager.Instance.GetCountdownToStartTimer()).ToString("#.##");
+        countdownText.text = Mathf.Ceil(gameStateSO.countdownToStartTimer).ToString("#.##");
     }
 }

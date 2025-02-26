@@ -19,6 +19,9 @@ public class StoveCounter : BaseCounter, IHasProgress
         Burnt,
     }
 
+    private AudioSource audioSource;
+
+
 
     [SerializeField] private FryingRecipeSO[] fryingRecipeSOArray;
 
@@ -29,10 +32,32 @@ public class StoveCounter : BaseCounter, IHasProgress
     private FryingRecipeSO fryingRecipeSO;
 
 
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();  
+    }
+
     private void Start()
     {
         state = State.Idle;
+        this.OnStateChanged += StoveCounter_OnStateChanged;
     }
+
+    private void StoveCounter_OnStateChanged(object sender, OnStateChangedEventArgs e)
+    {
+        if (state != State.Idle)
+        {
+            if (!audioSource.isPlaying)  // Prevent overlapping sounds
+            {
+                audioSource.Play();  // Plays from the stove's position
+            }
+        }
+        else
+        {
+            audioSource.Stop();  // Stops when frying ends
+        }
+    }
+
     private void Update()
     {
         if (HasFoodObject())
@@ -43,12 +68,12 @@ public class StoveCounter : BaseCounter, IHasProgress
                     break;
                 case State.Frying:
                     fryingTimer += Time.deltaTime;
-
                     OnProgressChanged?.Invoke(this, new IHasProgress.OnProgressChangeEventArgs
                     {
                         ProgressNormalized = fryingTimer / fryingRecipeSO.fryingTimerMax
 
                     });
+
                     if (fryingTimer > fryingRecipeSO.fryingTimerMax)
                     {
                         //has been fried

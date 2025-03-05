@@ -9,6 +9,7 @@ public class TrashCounter : BaseCounter
     {
         if(player.HasFoodObject())
         {
+            EventManager.Instance.TriggerEvent("ObjectTrashed", this);
             player.GetFoodObject().DestroySelf();
             OnAnyObjectTrashed?.Invoke(this, EventArgs.Empty);
         }

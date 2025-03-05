@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentScore: 0
   highScore: 0
-  waitingToStartTimer: -0.0035461877
-  countdownToStartTimer: -0.0141461305
-  gamePlayingTimer: -0.0018287171
+  waitingToStartTimer: -0.0057130177
+  countdownToStartTimer: -0.003985822
+  gamePlayingTimer: -0.023818303
   currentGameState: 3

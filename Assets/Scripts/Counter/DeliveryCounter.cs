@@ -17,6 +17,7 @@ public class DeliveryCounter : BaseCounter
             if(player.GetFoodObject().TryGetPlate(out PlateFoodObject plateFoodObject))
             {
                 DeliveryManager.Instance.DeliverRecipe(plateFoodObject);
+
                 player.GetFoodObject().DestroySelf();
 
             }

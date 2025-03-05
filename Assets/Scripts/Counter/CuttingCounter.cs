@@ -80,6 +80,8 @@ public class CuttingCounter : BaseCounter, IHasProgress
             //has foodObject here, and can be cut
         {
             cuttingProgress++;
+            EventManager.Instance.TriggerEvent("ObjectCut", this);
+
             OnAnyObjectCut?.Invoke(this, EventArgs.Empty);
 
 

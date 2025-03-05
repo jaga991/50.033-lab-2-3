@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameStateSO gameStateSO;
     [SerializeField] private GameStateChangedEvent gameStateChangedEvent;
+    [SerializeField] private GameObject BackgroundMusic;
+    
 
     private void Awake()
     {
@@ -27,6 +29,11 @@ public class GameManager : MonoBehaviour
         }
 
         ResetGameState();
+    }
+
+    private void Start()
+    {
+
     }
 
     private void Update()
@@ -100,7 +107,7 @@ public class GameManager : MonoBehaviour
         gameStateSO.currentScore = 0;
         gameStateSO.waitingToStartTimer = 1f;
         gameStateSO.countdownToStartTimer = 3f;
-        gameStateSO.gamePlayingTimer = 10f;
+        gameStateSO.gamePlayingTimer = 50f;
     }
 
 }

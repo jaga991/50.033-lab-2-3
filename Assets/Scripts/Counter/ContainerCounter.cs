@@ -21,7 +21,7 @@ public class ContainerCounter : BaseCounter
         if (!HasFoodObject() && !player.HasFoodObject())
         {
             //spawn food object
-
+            EventManager.Instance.TriggerEvent("PlayerPickedSomething");
             FoodObject.SpawnFoodObject(foodObjectSO, player);
         }
     }

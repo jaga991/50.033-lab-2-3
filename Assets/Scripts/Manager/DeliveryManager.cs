@@ -87,6 +87,8 @@ public class DeliveryManager : MonoBehaviour
 
                 if (plateMatchesRecipe)
                 {
+                    EventManager.Instance.TriggerEvent("RecipeSuccess");
+
                     gameStateSO.currentScore++;
                     waitingRecipeSOList.RemoveAt(i);
                     recipeCompletedEvent.Raise(true); // Recipe completed successfully
@@ -97,6 +99,7 @@ public class DeliveryManager : MonoBehaviour
         }
 
         Debug.Log("Player delivered an incorrect recipe");
+        EventManager.Instance.TriggerEvent("RecipeFailed");
         recipeFailedEvent.Raise(gameStateSO.currentScore); // Notify UI of failed delivery
     }
 

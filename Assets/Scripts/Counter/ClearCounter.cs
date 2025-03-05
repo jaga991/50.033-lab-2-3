@@ -20,6 +20,7 @@ public class ClearCounter : BaseCounter //inherit
             {
                 player.GetFoodObject().SetFoodObjectParent(this);
                 this.GetFoodObject().GetComponentInChildren<SpriteRenderer>().sortingOrder = 5;
+                EventManager.Instance.TriggerEvent("ObjectPlaced", this);
             }
             else
             {
@@ -38,6 +39,8 @@ public class ClearCounter : BaseCounter //inherit
                     if (plateFoodObject.TryAddIngredient(GetFoodObject().GetFoodObjectSO()))
                     //if succeed add ingredient, can destroy itself
                     {
+                        EventManager.Instance.TriggerEvent("PlayerPickedSomething", this);
+
                         GetFoodObject().DestroySelf();
                     }
 
@@ -50,6 +53,8 @@ public class ClearCounter : BaseCounter //inherit
                         //counter is holding a plate
                         if(plateFoodObject.TryAddIngredient(player.GetFoodObject().GetFoodObjectSO()))
                         {
+                            EventManager.Instance.TriggerEvent("ObjectPlaced", this);
+
                             player.GetFoodObject().DestroySelf();
                         }
                     }
@@ -59,6 +64,8 @@ public class ClearCounter : BaseCounter //inherit
             }
             else
             {
+                EventManager.Instance.TriggerEvent("PlayerPickedSomething", this);
+
                 //player not carrying anything
                 GetFoodObject().SetFoodObjectParent(player);
             }
